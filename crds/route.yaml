@@ -32,7 +32,7 @@ spec:
                   example: subdomain.user.com/uri
                   minLength: 0
                   maxLength: 256
-                target:
+                targets:
                   type: array
                   minItems: 1
                   maxItems: 2
