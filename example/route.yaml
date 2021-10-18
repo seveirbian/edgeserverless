@@ -1,0 +1,14 @@
+apiVersion: edgeserverless.kubeedge.io/v1alpha1
+kind: Route
+metadata:
+  name: edgeserverless-route
+  namespace: edgeserverless-demo
+spec:
+  id: eeb2dd1c-2fe2-11ec-8d3d-0242ac130003
+  name: route-name
+  uri: bianshengwei.com/myjsfunc
+  target:
+    - function-urn: edgeserverless-svc-hostname-1
+      ratio: 50
+    - function-urn: edgeserverless-svc-hostname-2
+      ratio: 50

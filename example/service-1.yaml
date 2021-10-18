@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edgeserverless-app-hostname-1
+  namespace: edgeserverless-demo
+  labels:
+    app: edgeserverless-app-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edgeserverless-app-1
+  template:
+    metadata:
+      labels:
+        app: edgeserverless-app-1
+    spec:
+      nodeName: b00573080-kubeedge-serverless-sn1-node-0001
+      containers:
+        - name: edgeserverless-app-hostname
+          image: mirrorgooglecontainers/serve_hostname:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9376
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edgeserverless-svc-hostname-1
+  namespace: edgeserverless-demo
+spec:
+  selector:
+    app: edgeserverless-app-1
+  ports:
+    - name: http-0
+      port: 12345
+      protocol: TCP
+      targetPort: 9376
