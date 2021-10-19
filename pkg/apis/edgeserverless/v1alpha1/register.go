@@ -7,12 +7,11 @@ import (
 	"github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless"
 )
 
-// GroupName is the group name use in this package
-const GroupName = "edgeserverless.kubeedge.io"
-
 // 注册自己的自定义资源
-var SchemeGroupVersion = schema.GroupVersion{Group: edgeserverless.Group,
-	Version: edgeserverless.Version}
+var SchemeGroupVersion = schema.GroupVersion{
+	Group: edgeserverless.Group,
+	Version: edgeserverless.Version
+}
 
 // Resource takes an unqualified resource and returns a Group qualified GroupResource
 func Resource(resource string) schema.GroupResource {
