@@ -10,7 +10,7 @@ import (
 // 注册自己的自定义资源
 var SchemeGroupVersion = schema.GroupVersion{
 	Group: edgeserverless.Group,
-	Version: edgeserverless.Version
+	Version: edgeserverless.Version,
 }
 
 // Resource takes an unqualified resource and returns a Group qualified GroupResource
