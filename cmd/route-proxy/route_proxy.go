@@ -7,13 +7,11 @@ import (
 	"github.com/golang/glog"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	// Uncomment the following line to load the gcp plugin (only required to authenticate against GKE clusters).
-	// _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	clientset "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned"
 	informers "github.com/seveirbian/edgeserverless/pkg/client/informers/externalversions"
-	"github.com/seveirbian/edgeserverless/pkg/signals"
 	"github.com/seveirbian/edgeserverless/pkg/controller"
+	"github.com/seveirbian/edgeserverless/pkg/signals"
 )
 
 var (

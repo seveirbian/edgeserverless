@@ -19,10 +19,9 @@ import (
 
 	edgeserverless "github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless/v1alpha1"
 	clientset "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned"
+	routescheme "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned/scheme"
 	informers "github.com/seveirbian/edgeserverless/pkg/client/informers/externalversions/edgeserverless/v1alpha1"
 	listers "github.com/seveirbian/edgeserverless/pkg/client/listers/edgeserverless/v1alpha1"
-	routescheme "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned/scheme"
-
 )
 
 const controllerAgentName = "route-controller"
@@ -61,12 +60,12 @@ func NewRouteController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &RouteController{
-		kubeClientSet:    kubeClientSet,
+		kubeClientSet:  kubeClientSet,
 		routeClientSet: routeClientSet,
 		routesLister:   routeInformer.Lister(),
 		routesSynced:   routeInformer.Informer().HasSynced,
-		workQueue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Routes"),
-		recorder:         recorder,
+		workQueue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Routes"),
+		recorder:       recorder,
 	}
 
 	glog.Info("Setting up event handlers")

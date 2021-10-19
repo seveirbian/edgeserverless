@@ -16,15 +16,15 @@ type Route struct {
 }
 
 type RouteSpec struct {
-	ID string `json:"id,omitempty"`
-	Name string `json:"name"`
-	URI string `json:"uri"`
+	ID      string        `json:"id,omitempty"`
+	Name    string        `json:"name"`
+	URI     string        `json:"uri"`
 	Targets []RouteTarget `json:"targets"`
 }
 
 type RouteTarget struct {
 	FunctionUrn string `json:"function-urn"`
-	Ratio int64 `json:"ratio"`
+	Ratio       int64  `json:"ratio"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

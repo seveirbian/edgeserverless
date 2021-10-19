@@ -1,15 +1,15 @@
 package v1alpha1
 
 import (
+	"github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless"
 )
 
 // 注册自己的自定义资源
 var SchemeGroupVersion = schema.GroupVersion{
-	Group: edgeserverless.Group,
+	Group:   edgeserverless.Group,
 	Version: edgeserverless.Version,
 }
 
