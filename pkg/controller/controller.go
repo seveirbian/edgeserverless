@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang/glog"
@@ -17,6 +18,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
+	"github.com/seveirbian/edgeserverless/pkg/rulesmanager"
 	edgeserverless "github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless/v1alpha1"
 	clientset "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned"
 	routescheme "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned/scheme"
@@ -44,13 +46,17 @@ type RouteController struct {
 	workQueue workqueue.RateLimitingInterface
 
 	recorder record.EventRecorder
+
+	routeToURI sync.Map
+	rulesManager *rulesmanager.RulesManager
 }
 
 // NewRouteController returns a new route controller
 func NewRouteController(
 	kubeClientSet kubernetes.Interface,
 	routeClientSet clientset.Interface,
-	routeInformer informers.RouteInformer) *RouteController {
+	routeInformer informers.RouteInformer,
+	rulesManager *rulesmanager.RulesManager) *RouteController {
 
 	utilruntime.Must(routescheme.AddToScheme(scheme.Scheme))
 	glog.V(4).Info("Creating event broadcaster")
@@ -66,6 +72,8 @@ func NewRouteController(
 		routesSynced:   routeInformer.Informer().HasSynced,
 		workQueue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Routes"),
 		recorder:       recorder,
+		routeToURI:     sync.Map{},
+		rulesManager:   rulesManager,
 	}
 
 	glog.Info("Setting up event handlers")
@@ -167,6 +175,19 @@ func (c *RouteController) syncHandler(key string) error {
 		// 如果Route对象被删除了，就会走到这里，所以应该在这里加入执行
 		if errors.IsNotFound(err) {
 			glog.Infof("Route对象被删除，请在这里执行实际的删除业务: %s/%s ...", namespace, name)
+			value, ok := c.routeToURI.Load(key)
+			if !ok {
+				fmt.Printf("[route controller] no route %s to uri\n", key)
+				return nil
+			}
+
+			uri, ok := value.(string)
+			if !ok {
+				return fmt.Errorf("[route controller] uri not string\n")
+			}
+
+			c.rulesManager.DeleteRule(uri)
+			c.routeToURI.Delete(key)
 
 			return nil
 		}
@@ -178,6 +199,9 @@ func (c *RouteController) syncHandler(key string) error {
 
 	glog.Infof("这里是route对象的期望状态: %#v ...", route)
 	glog.Infof("实际状态是从业务层面得到的，此处应该去的实际状态，与期望状态做对比，并根据差异做出响应(新增或者删除)")
+
+	c.rulesManager.AddRule(route.Spec.URI, route.Spec)
+	c.routeToURI.Store(key, route.Spec.URI)
 
 	c.recorder.Event(route, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil

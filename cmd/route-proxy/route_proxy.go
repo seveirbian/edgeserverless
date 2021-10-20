@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/golang/glog"
@@ -11,6 +12,7 @@ import (
 	clientset "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned"
 	informers "github.com/seveirbian/edgeserverless/pkg/client/informers/externalversions"
 	"github.com/seveirbian/edgeserverless/pkg/controller"
+	"github.com/seveirbian/edgeserverless/pkg/rulesmanager"
 	"github.com/seveirbian/edgeserverless/pkg/signals"
 )
 
@@ -19,13 +21,46 @@ var (
 	kubeconfig string
 )
 
+var (
+	stopCh = signals.SetupSignalHandler()
+
+	RManager *rulesmanager.RulesManager
+	RController *controller.RouteController
+)
+
 func main() {
 	flag.Parse()
 
-	// 处理信号量
-	stopCh := signals.SetupSignalHandler()
+	Prepare()
 
-	// 处理入参
+	go func() {
+		for {
+			RManager.Rules.Range(func(key, value interface{}) bool {
+				fmt.Printf("%v %v", key, value)
+				return true
+			})
+			time.Sleep(1)
+		}
+	}()
+
+	err := RController.Run(2, stopCh)
+	if err != nil {
+		glog.Fatalf("Error running controller: %s", err.Error())
+	}
+}
+
+func Prepare() {
+	var trace = 1
+
+	// initialize rules manager
+	fmt.Printf("[route-proxy] %d initialize rules manager\n", trace)
+	trace++
+	RManager = rulesmanager.NewRulesManager()
+
+	// initialize route controller
+	fmt.Printf("[route-proxy] %d initialize route controller\n", trace)
+	trace++
+
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
 		glog.Fatalf("Error building kubeconfig: %s", err.Error())
@@ -43,17 +78,10 @@ func main() {
 
 	routeInformerFactory := informers.NewSharedInformerFactory(studentClient, time.Second*30)
 
-	//得到controller
-	controller := controller.NewRouteController(kubeClient, studentClient,
-		routeInformerFactory.Edgeserverless().V1alpha1().Routes())
+	RController = controller.NewRouteController(kubeClient, studentClient,
+		routeInformerFactory.Edgeserverless().V1alpha1().Routes(), RManager)
 
-	//启动informer
 	go routeInformerFactory.Start(stopCh)
-
-	//controller开始处理消息
-	if err = controller.Run(2, stopCh); err != nil {
-		glog.Fatalf("Error running controller: %s", err.Error())
-	}
 }
 
 func init() {
