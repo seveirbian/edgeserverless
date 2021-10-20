@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/seveirbian/edgeserverless/pkg/entry"
 	"time"
 
 	"github.com/golang/glog"
@@ -24,8 +25,9 @@ var (
 var (
 	stopCh = signals.SetupSignalHandler()
 
-	RManager *rulesmanager.RulesManager
-	RController *controller.RouteController
+	RulesManager *rulesmanager.RulesManager
+	Entry *entry.Entry
+	RouteController *controller.RouteController
 )
 
 func main() {
@@ -33,17 +35,9 @@ func main() {
 
 	Prepare()
 
-	go func() {
-		for {
-			RManager.Rules.Range(func(key, value interface{}) bool {
-				fmt.Printf("%v %v", key, value)
-				return true
-			})
-			time.Sleep(1)
-		}
-	}()
+	go Entry.Start()
 
-	err := RController.Run(2, stopCh)
+	err := RouteController.Run(2, stopCh)
 	if err != nil {
 		glog.Fatalf("Error running controller: %s", err.Error())
 	}
@@ -55,7 +49,7 @@ func Prepare() {
 	// initialize rules manager
 	fmt.Printf("[route-proxy] %d initialize rules manager\n", trace)
 	trace++
-	RManager = rulesmanager.NewRulesManager()
+	RulesManager = rulesmanager.NewRulesManager()
 
 	// initialize route controller
 	fmt.Printf("[route-proxy] %d initialize route controller\n", trace)
@@ -71,17 +65,22 @@ func Prepare() {
 		glog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	studentClient, err := clientset.NewForConfig(cfg)
+	routeClient, err := clientset.NewForConfig(cfg)
 	if err != nil {
 		glog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	routeInformerFactory := informers.NewSharedInformerFactory(studentClient, time.Second*30)
+	routeInformerFactory := informers.NewSharedInformerFactory(routeClient, time.Second*30)
 
-	RController = controller.NewRouteController(kubeClient, studentClient,
-		routeInformerFactory.Edgeserverless().V1alpha1().Routes(), RManager)
+	RouteController = controller.NewRouteController(kubeClient, routeClient,
+		routeInformerFactory.Edgeserverless().V1alpha1().Routes(), RulesManager)
 
 	go routeInformerFactory.Start(stopCh)
+
+	// initialize entry
+	fmt.Printf("[route-proxy] %d initialize entry\n", trace)
+	trace++
+	Entry = entry.NewEntry(RulesManager)
 }
 
 func init() {
