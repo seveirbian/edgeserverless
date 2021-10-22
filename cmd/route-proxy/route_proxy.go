@@ -21,6 +21,7 @@ import (
 var (
 	masterURL  string
 	kubeconfig string
+	fnAccessor string
 )
 
 var (
@@ -56,6 +57,7 @@ func Prepare() {
 	fmt.Printf("[route-proxy] %d initialize backends\n", trace)
 	trace++
 	backend.NewK8sServiceBackend()
+	backend.NewYuanrongBackend(fnAccessor)
 
 	// initialize route controller
 	fmt.Printf("[route-proxy] %d initialize route controller\n", trace)
@@ -92,4 +94,5 @@ func Prepare() {
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&fnAccessor, "fnAccessor", "", "The address of FnAccessor. Like 192.168.0.1:11111")
 }
