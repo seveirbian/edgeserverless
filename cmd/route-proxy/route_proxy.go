@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/seveirbian/edgeserverless/pkg/backend"
 	"github.com/seveirbian/edgeserverless/pkg/entry"
 	"time"
 
@@ -50,6 +51,11 @@ func Prepare() {
 	fmt.Printf("[route-proxy] %d initialize rules manager\n", trace)
 	trace++
 	RulesManager = rulesmanager.NewRulesManager()
+
+	// initialize backends
+	fmt.Printf("[route-proxy] %d initialize backends\n", trace)
+	trace++
+	backend.NewK8sServiceBackend()
 
 	// initialize route controller
 	fmt.Printf("[route-proxy] %d initialize route controller\n", trace)
