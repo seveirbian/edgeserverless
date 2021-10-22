@@ -23,7 +23,8 @@ type RouteSpec struct {
 }
 
 type RouteTarget struct {
-	FunctionUrn string `json:"function-urn"`
+	Target      string `json:"target"`
+	Type        string `json:"type"`
 	Ratio       int64  `json:"ratio"`
 }
 

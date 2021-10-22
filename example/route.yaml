@@ -8,7 +8,9 @@ spec:
   name: route-name
   uri: bianshengwei.com/myjsfunc
   targets:
-    - function-urn: edgeserverless-svc-hostname-1
+    - target: edgeserverless-svc-hostname-1
+      type: k8sservice
       ratio: 50
-    - function-urn: edgeserverless-svc-hostname-2
+    - target: edgeserverless-svc-hostname-2
+      type: k8sservice
       ratio: 50

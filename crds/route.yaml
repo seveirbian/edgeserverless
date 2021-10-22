@@ -39,8 +39,13 @@ spec:
                   items:
                     type: object
                     properties:
-                      function-urn:
+                      target:
                         type: string
+                      type:
+                        type: string
+                        enum:
+                          - k8sservice
+                          - yuanrong
                       ratio:
                         type: integer
                         format: int64
