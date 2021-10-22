@@ -5,7 +5,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var Backends map[string]Backend
+var Backends = map[string]Backend{}
 
 type Backend interface {
 	Invoke(string, *fasthttp.Request, *fasthttp.Response) error
