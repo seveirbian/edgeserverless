@@ -1,1 +1,3 @@
 .idea
+cmd/route-proxy/route-proxy
+cmd/route-proxy/route-proxy.exe
