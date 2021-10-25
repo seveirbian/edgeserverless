@@ -37,6 +37,7 @@ func NewEntry(rulesManager *rulesmanager.RulesManager) *Entry {
 }
 
 func (e *Entry) Start () {
+	e.Server.Get("/", e.healthCheck)
 	e.Server.Get("/*", e.serve)
 	e.Server.Post("/*", e.serve)
 
@@ -44,6 +45,12 @@ func (e *Entry) Start () {
 	if err != nil {
 		fmt.Printf("[entry] exit with %v\n", err)
 	}
+}
+
+func (e *Entry) healthCheck(c *fiber.Ctx) error {
+	c.Response().SetStatusCode(200)
+
+	return nil
 }
 
 func (e *Entry) serve (c *fiber.Ctx) error {
