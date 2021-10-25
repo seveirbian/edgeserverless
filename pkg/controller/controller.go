@@ -18,12 +18,12 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/seveirbian/edgeserverless/pkg/rulesmanager"
 	edgeserverless "github.com/seveirbian/edgeserverless/pkg/apis/edgeserverless/v1alpha1"
 	clientset "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned"
 	routescheme "github.com/seveirbian/edgeserverless/pkg/client/clientset/versioned/scheme"
 	informers "github.com/seveirbian/edgeserverless/pkg/client/informers/externalversions/edgeserverless/v1alpha1"
 	listers "github.com/seveirbian/edgeserverless/pkg/client/listers/edgeserverless/v1alpha1"
+	"github.com/seveirbian/edgeserverless/pkg/rulesmanager"
 )
 
 const controllerAgentName = "route-controller"
@@ -47,7 +47,7 @@ type RouteController struct {
 
 	recorder record.EventRecorder
 
-	routeToURI sync.Map
+	routeToURI   sync.Map
 	rulesManager *rulesmanager.RulesManager
 }
 
@@ -200,6 +200,15 @@ func (c *RouteController) syncHandler(key string) error {
 	glog.Infof("这里是route对象的期望状态: %#v ...", route)
 	glog.Infof("实际状态是从业务层面得到的，此处应该去的实际状态，与期望状态做对比，并根据差异做出响应(新增或者删除)")
 
+	if value, ok := c.routeToURI.Load(key); ok {
+		uri, ok := value.(string)
+		if !ok {
+			fmt.Printf(fmt.Sprintf("[controller] delete error: not a valid uri string %v\n", value))
+			return fmt.Errorf("[controller] delete error: not a valid uri string %v\n", value)
+		}
+		c.rulesManager.DeleteRule(uri)
+		c.routeToURI.Delete(key)
+	}
 	c.rulesManager.AddRule(route.Spec.URI, route.Spec)
 	c.routeToURI.Store(key, route.Spec.URI)
 

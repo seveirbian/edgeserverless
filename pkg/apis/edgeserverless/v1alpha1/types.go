@@ -23,9 +23,9 @@ type RouteSpec struct {
 }
 
 type RouteTarget struct {
-	Target      string `json:"target"`
-	Type        string `json:"type"`
-	Ratio       int64  `json:"ratio"`
+	Target string `json:"target"`
+	Type   string `json:"type"`
+	Ratio  int64  `json:"ratio"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

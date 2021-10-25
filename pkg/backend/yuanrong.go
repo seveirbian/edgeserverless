@@ -18,13 +18,13 @@ func (y *YuanrongBackend) Invoke(target string, req *fasthttp.Request, res *fast
 	fmt.Printf("yuanrong uri %s\n", uri)
 
 	req.SetRequestURI(uri)
-	
+
 	insecureClient := fasthttp.Client{
 		TLSConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
 	}
-	
+
 	return insecureClient.Do(req, res)
 }
 

@@ -27,8 +27,8 @@ var (
 var (
 	stopCh = signals.SetupSignalHandler()
 
-	RulesManager *rulesmanager.RulesManager
-	Entry *entry.Entry
+	RulesManager    *rulesmanager.RulesManager
+	Entry           *entry.Entry
 	RouteController *controller.RouteController
 )
 

@@ -14,10 +14,10 @@ import (
 
 type Entry struct {
 	Server *fiber.App
-	Addr string
+	Addr   string
 
 	RulesManager *rulesmanager.RulesManager
-	HTTPClient *fasthttp.Client
+	HTTPClient   *fasthttp.Client
 }
 
 func NewEntry(rulesManager *rulesmanager.RulesManager) *Entry {
@@ -29,14 +29,14 @@ func NewEntry(rulesManager *rulesmanager.RulesManager) *Entry {
 	}
 
 	return &Entry{
-		Server: app,
-		Addr: ":1122",
+		Server:       app,
+		Addr:         ":1122",
 		RulesManager: rulesManager,
-		HTTPClient: client,
+		HTTPClient:   client,
 	}
 }
 
-func (e *Entry) Start () {
+func (e *Entry) Start() {
 	e.Server.Get("/", e.healthCheck)
 	e.Server.Get("/*", e.serve)
 	e.Server.Post("/*", e.serve)
@@ -53,7 +53,7 @@ func (e *Entry) healthCheck(c *fiber.Ctx) error {
 	return nil
 }
 
-func (e *Entry) serve (c *fiber.Ctx) error {
+func (e *Entry) serve(c *fiber.Ctx) error {
 	uri := c.Hostname() + c.Path()
 	fmt.Println(uri)
 	route, err := e.RulesManager.GetRule(uri)
